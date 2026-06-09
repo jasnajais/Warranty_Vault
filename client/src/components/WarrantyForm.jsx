@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 
 const empty = {
   productName: "",
@@ -9,11 +10,43 @@ const empty = {
   receipt: null,
 };
 
-export default function WarrantyForm({ onSubmit, onCancel, loading }) {
+export default function WarrantyForm({
+  onSubmit,
+  onCancel,
+  loading,
+  initialData,
+  title = "Add Warranty",
+  submitLabel = "Save Warranty",
+}) {
   const [form, setForm] = useState(empty);
   const [preview, setPreview] = useState(null);
 
+  // Prefill when editing
+  useEffect(() => {
+    if (!initialData) {
+      setForm(empty);
+      setPreview(null);
+      return;
+    }
+
+    setForm({
+      productName: initialData.productName ?? "",
+      store: initialData.store ?? "",
+      purchaseDate: initialData.purchaseDate
+        ? String(initialData.purchaseDate).slice(0, 10)
+        : "",
+      warrantyMonths: String(initialData.warrantyMonths ?? "12"),
+      notes: initialData.notes ?? "",
+      receipt: null,
+    });
+
+    setPreview(null);
+  }, [initialData]);
+
+
+
   const handleChange = (e) => {
+
     const { name, value, files } = e.target;
     if (name === "receipt" && files?.[0]) {
       setForm((f) => ({ ...f, receipt: files[0] }));
@@ -38,8 +71,9 @@ export default function WarrantyForm({ onSubmit, onCancel, loading }) {
   return (
     <div className="modal-overlay" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Add Warranty</h2>
+        <h2>{title}</h2>
         <p className="modal-sub">Store receipt details and track expiry dates.</p>
+
 
         <form onSubmit={handleSubmit} className="form">
           <label>
@@ -123,8 +157,9 @@ export default function WarrantyForm({ onSubmit, onCancel, loading }) {
               Cancel
             </button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "Saving..." : "Save Warranty"}
+              {loading ? "Saving..." : submitLabel}
             </button>
+
           </div>
         </form>
       </div>

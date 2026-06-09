@@ -13,3 +13,9 @@ export const createWarranty = (formData) =>
   });
 
 export const deleteWarranty = (id) => api.delete(`/api/warranties/${id}`);
+
+export const updateWarranty = (id, formData) =>
+  api.put(`/api/warranties/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+

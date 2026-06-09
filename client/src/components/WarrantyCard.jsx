@@ -1,10 +1,11 @@
 import { formatDate, statusLabel, daysLeftText } from "../utils/format";
 
-export default function WarrantyCard({ item, onDelete }) {
+export default function WarrantyCard({ item, onDelete, onUpdate }) {
   const isPdf = item.receiptImage?.endsWith(".pdf");
 
   return (
     <article className={`warranty-card status-${item.status}`}>
+
       <div className="card-header">
         <div>
           <h3>{item.productName}</h3>
@@ -55,10 +56,14 @@ export default function WarrantyCard({ item, onDelete }) {
       </div>
 
       <div className="card-footer">
+        <button className="btn-secondary" onClick={() => onUpdate(item)}>
+          Update
+        </button>
         <button className="btn-danger" onClick={() => onDelete(item._id)}>
           Delete
         </button>
       </div>
+
     </article>
   );
 }

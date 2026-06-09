@@ -7,7 +7,9 @@ import {
   deleteWarranty,
   fetchStats,
   fetchWarranties,
+  updateWarranty,
 } from "./services/api";
+
 import "./App.css";
 
 const FILTERS = [
@@ -23,9 +25,12 @@ export default function App() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+
 
   const loadData = useCallback(async () => {
     try {
@@ -49,6 +54,7 @@ export default function App() {
   }, [loadData, search]);
 
   const handleCreate = async (formData) => {
+
     setSaving(true);
     try {
       await createWarranty(formData);
@@ -70,6 +76,26 @@ export default function App() {
       setError("Failed to delete warranty.");
     }
   };
+
+  const handleEditStart = (item) => {
+    setEditingItem(item);
+    setShowForm(true);
+  };
+
+  const handleUpdate = async (id, formData) => {
+    setSaving(true);
+    try {
+      await updateWarranty(id, formData);
+      setShowForm(false);
+      setEditingItem(null);
+      await loadData();
+    } catch {
+      setError("Failed to update warranty. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
 
   return (
     <div className="app">
@@ -124,19 +150,35 @@ export default function App() {
         ) : (
           <div className="warranty-grid">
             {warranties.map((item) => (
-              <WarrantyCard key={item._id} item={item} onDelete={handleDelete} />
+              <WarrantyCard
+                key={item._id}
+                item={item}
+                onDelete={handleDelete}
+                onUpdate={handleEditStart}
+              />
             ))}
+
           </div>
         )}
       </main>
 
       {showForm && (
         <WarrantyForm
-          onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
+          onSubmit={(formData) =>
+            editingItem ? handleUpdate(editingItem._id, formData) : handleCreate(formData)
+          }
+
+          onCancel={() => {
+            setShowForm(false);
+            setEditingItem(null);
+          }}
           loading={saving}
+          initialData={editingItem}
+          title={editingItem ? "Update Warranty" : "Add Warranty"}
+          submitLabel={editingItem ? "Update Warranty" : "Save Warranty"}
         />
       )}
+
     </div>
   );
 }
